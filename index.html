@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="UTF-8" />
+  <title>EditinGwithPK – Image Multi‑Tool Suite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Top navbar -->
+  <header class="nav">
+    <div class="logo">EditinGwith<span>PK</span></div>
+
+    <nav class="nav-links">
+      <button class="nav-link active" data-tool="resize">Resize & Compress</button>
+      <button class="nav-link" data-tool="crop">Crop</button>
+      <button class="nav-link" data-tool="bg">Background</button>
+      <button class="nav-link" data-tool="convert">Format</button>
+    </nav>
+
+    <div class="nav-actions">
+      <!-- Theme toggle button -->
+      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+        🌙
+      </button>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <main class="layout">
+    <!-- LEFT: preview (Live canvas preview) -->
+    <section class="panel panel-left">
+      <div class="preview-header">
+        <div>
+          <strong>Live canvas preview</strong>
+          <div class="sub">
+            All tools work on this preview – resize, crop, background & format.
+          </div>
+        </div>
+        <div id="previewTag" class="preview-tag">No image</div>
+      </div>
+
+      <div class="tab-row">
+        <button class="tab active" data-tab="view">View</button>
+        <button class="tab" data-tab="crop">Crop</button>
+        <button class="tab" data-tab="bg">Background</button>
+      </div>
+
+      <div id="previewArea" class="preview-area">
+        <canvas id="canvas"></canvas>
+        <div id="cropRect" class="crop-rect"></div>
+        <div id="previewPlaceholder" class="preview-placeholder">
+          Upload an image on the right to start.
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: controls (Smart Image Studio) -->
+    <section class="panel panel-right">
+      <h1 class="title">Smart Image Studio</h1>
+      <p class="subtitle">
+        Resize, compress, crop, remove background and convert formats – directly in your browser.
+      </p>
+
+      <!-- Upload box -->
+      <div id="uploadArea" class="upload-area">
+        <div class="upload-icon">📁</div>
+        <p><span>Click to browse</span> or drag & drop an image here</p>
+        <p class="upload-sub">
+          Supports JPG, PNG, WebP up to ~10 MB. Nothing is uploaded to any server.
+        </p>
+        <input type="file" id="fileInput" accept="image/*" hidden />
+      </div>
+
+      <div class="pill-row">
+        <span class="pill">Client‑side only</span>
+        <span class="pill">KB‑based compression</span>
+        <span class="pill">Drag to crop</span>
+        <span class="pill">Basic BG remove</span>
+      </div>
+
+      <!-- TOOL SECTIONS (shown/hidden by JS) -->
+
+      <!-- Resize & compress -->
+      <section id="tool-resize" class="tool-section active">
+        <h2 class="section-heading">Resize & Compress</h2>
+
+        <div class="controls-grid">
+          <div class="field">
+            <label>Resize mode</label>
+            <select id="mode">
+              <option value="pixels">By pixels (W × H)</option>
+              <option value="percent">By percentage</option>
+            </select>
+          </div>
+
+          <div class="field" id="pixelsFields">
+            <label>Width × Height (px)</label>
+            <div class="field-row">
+              <input type="number" id="widthInput" placeholder="Width" min="1" />
+              <input type="number" id="heightInput" placeholder="Height" min="1" />
+            </div>
+          </div>
+
+          <div class="field" id="percentField">
+            <label>Scale (%)</label>
+            <input type="number" id="percentInput" value="100" min="1" max="500" />
+          </div>
+
+          <div class="field">
+            <label>Format</label>
+            <select id="formatSelect">
+              <option value="image/jpeg">JPG</option>
+              <option value="image/png">PNG</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Quality <span class="badge">JPEG only</span></label>
+            <div class="slider-row">
+              <input type="range" id="qualityRange" min="40" max="100" value="85" />
+              <span id="qualityValue">85%</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Target size (KB)</label>
+            <input type="number" id="targetKbInput" placeholder="e.g. 200" min="5" />
+          </div>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="lockRatio" checked />
+          <span>Lock aspect ratio while resizing</span>
+        </label>
+
+        <div class="actions">
+          <button id="resizeBtn" class="btn btn-primary">Update preview</button>
+          <button id="downloadBtn" class="btn btn-soft" disabled>Download image</button>
+        </div>
+      </section>
+
+      <!-- Crop tool -->
+      <section id="tool-crop" class="tool-section">
+        <h2 class="section-heading">Crop</h2>
+        <p class="hint">
+          Switch to <strong>Crop</strong> tab on left, then click‑and‑drag on the image to select area.
+        </p>
+        <button id="applyCropBtn" class="btn btn-soft" disabled>Apply selected crop</button>
+      </section>
+
+      <!-- Background tool -->
+      <section id="tool-bg" class="tool-section">
+        <h2 class="section-heading">Background</h2>
+        <p class="hint">
+          One‑click basic background cleaner for mostly solid/light backgrounds.
+        </p>
+        <button id="bgRemoveBtn" class="btn btn-soft" disabled>Remove background</button>
+      </section>
+
+      <!-- Format convert tool -->
+      <section id="tool-convert" class="tool-section">
+        <h2 class="section-heading">Format Convert</h2>
+        <div class="controls-grid">
+          <div class="field">
+            <label>Output format</label>
+            <select id="convertFormatSelect">
+              <option value="image/jpeg">Convert to JPG</option>
+              <option value="image/png">Convert to PNG</option>
+              <option value="image/webp">Convert to WebP</option>
+            </select>
+          </div>
+        </div>
+        <p class="hint">
+          Click “Download image” – file will be exported in selected format.
+        </p>
+      </section>
+
+      <div class="info-row">
+        <span id="origInfo">Original: –</span>
+        <span id="newInfo">Output: –</span>
+      </div>
+      <div id="errorMsg" class="error"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© @CodingWithPk2025 – EditinGwithPK. All tools run in your browser.</span>
+    <span>Tip: First resize, then use target KB + format convert for best control.</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
